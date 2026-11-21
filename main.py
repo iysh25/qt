@@ -373,15 +373,15 @@ with tab3:
             "쌓아 올려 총 길이가 개체마다 얼마나 다른지 한눈에 볼 수 있습니다."
         )
 
-        if not growth_df.empty and {"지상부 길이", "지하부 길이"} <= set(growth_df.columns):
-            df_plot = growth_df[["개체번호", "지상부 길이", "지하부 길이"]].copy()
-            df_plot["지상부 길이"] = pd.to_numeric(
-                df_plot["지상부 길이"], errors="coerce"
-            )
+        if not growth_df.empty and {"지하부 길이", "지상부 길이"} <= set(growth_df.columns):
+            df_plot = growth_df[["개체번호", "지하부 길이", "지상부 길이"]].copy()
             df_plot["지하부 길이"] = pd.to_numeric(
                 df_plot["지하부 길이"], errors="coerce"
             )
-            df_plot = df_plot.dropna(subset=["지상부 길이", "지하부 길이"])
+            df_plot["지상부 길이"] = pd.to_numeric(
+                df_plot["지상부 길이"], errors="coerce"
+            )
+            df_plot = df_plot.dropna(subset=["지하부 길이", "지상부 길이"])
             df_plot = df_plot.sort_values(
                 "지상부 길이", ascending=False
             ).reset_index(drop=True)
@@ -392,31 +392,31 @@ with tab3:
                 fig_stack = go.Figure()
                 fig_stack.add_trace(
                     go.Bar(
-                        name="지상부 길이",
-                        x=x_labels,
-                        y=df_plot["지상부 길이"].tolist(),
-                        marker_color="forestgreen",
-                        hovertemplate=(
-                            "개체: %{x}<br>"
-                            "지상부 길이: %{y:.1f} mm<extra></extra>"
-                        ),
-                    )
-                )
-                fig_stack.add_trace(
-                    go.Bar(
                         name="지하부 길이",
                         x=x_labels,
                         y=df_plot["지하부 길이"].tolist(),
-                        marker_color="chocolate",
+                        marker_color="forestgreen",
                         hovertemplate=(
                             "개체: %{x}<br>"
                             "지하부 길이: %{y:.1f} mm<extra></extra>"
                         ),
                     )
                 )
+                fig_stack.add_trace(
+                    go.Bar(
+                        name="지상부 길이",
+                        x=x_labels,
+                        y=df_plot["지상부 길이"].tolist(),
+                        marker_color="chocolate",
+                        hovertemplate=(
+                            "개체: %{x}<br>"
+                            "지상부 길이: %{y:.1f} mm<extra></extra>"
+                        ),
+                    )
+                )
                 fig_stack.update_layout(
                     barmode="stack",
-                    title="개체별 지상부 길이 + 지하부 길이 누적 (총 길이)",
+                    title="개체별 지하부 길이 + 지상부 길이 누적 (총 길이)",
                     xaxis_title="개체번호",
                     yaxis_title="길이 (mm)",
                     legend_title="구분",
@@ -426,7 +426,7 @@ with tab3:
                 apply_kor_font(fig_stack)
                 st.plotly_chart(fig_stack, width="stretch")
 
-                total_len = df_plot["지상부 길이"] + df_plot["지하부 길이"]
+                total_len = df_plot["지하부 길이"] + df_plot["지상부 길이"]
                 c1, c2, c3 = st.columns(3)
                 c1.metric(
                     "평균 총 길이",
@@ -437,12 +437,12 @@ with tab3:
                     ),
                 )
                 c2.metric(
-                    "지상부 평균",
-                    f"{float(df_plot['지상부 길이'].mean()):.1f} mm",
-                )
-                c3.metric(
                     "지하부 평균",
                     f"{float(df_plot['지하부 길이'].mean()):.1f} mm",
+                )
+                c3.metric(
+                    "지상부 평균",
+                    f"{float(df_plot['지상부 길이'].mean()):.1f} mm",
                 )
             else:
                 st.info(
